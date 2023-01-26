@@ -51,12 +51,17 @@ public class RobotContainer {
     //   * whenPressed renamed to onTrue
     //   * get renamed to getAsBoolean
     JoystickButton yButton = new JoystickButton(m_controller, XboxController.Button.kY.value);
-    yButton.onTrue(new GoStraight(m_driveTrain, 1.5, 0.0).until(() -> !yButton.getAsBoolean()));
+    yButton.whileTrue(new GoStraight(m_driveTrain, 1.5, 0.0));
     // A button makes robot go left at 1.3 feet/second, until button is released
     JoystickButton aButton = new JoystickButton(m_controller, XboxController.Button.kA.value);
-    aButton.onTrue(new GoStraight(m_driveTrain, 1.3, -90.).until(() -> !aButton.getAsBoolean()));
+    aButton.whileTrue(new GoStraight(m_driveTrain, 1.3, -90.));
     JoystickButton backButton = new JoystickButton(m_controller, XboxController.Button.kBack.value);
-    backButton.onTrue(new RumbleController(m_rumbler, 1.0, 1.0).withTimeout(3.0));
+    // Pressing 'back' button once causes left rumble for 1 sec., then right rumble 1 sec., then both gently for 1 sec.
+    backButton.onTrue(
+                      new RumbleController(m_rumbler, 1.0, 0.0).withTimeout(1.0)
+            .andThen( new RumbleController(m_rumbler, 0.0, 1.0).withTimeout(1.0))
+            .andThen( new RumbleController(m_rumbler, 0.5, 0.5).withTimeout(1.0))
+            );
     JoystickButton startButton = new JoystickButton(m_controller, XboxController.Button.kStart.value);
     startButton.onTrue(new SetForwardToTowardsFront(m_driveTrain));
   }

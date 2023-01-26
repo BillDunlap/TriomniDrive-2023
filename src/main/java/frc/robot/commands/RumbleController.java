@@ -16,6 +16,10 @@ public class RumbleController extends CommandBase {
     m_left = left;
     m_right = right;
     m_controllerRumbler = controllerRumbler;
+    /* Note that other subsystems may invoke rumbler, but not
+       through a command, so their settings may interfere with ones
+       set in this command */
+    addRequirements(m_controllerRumbler);
   }
 
   // Called when the command is initially scheduled.
@@ -26,7 +30,10 @@ public class RumbleController extends CommandBase {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    // Would not need this if other subsystems didn't also set rumble level
+    m_controllerRumbler.setRumble(m_left, m_right);
+  }
 
   // Called once the command ends or is interrupted.
   @Override
