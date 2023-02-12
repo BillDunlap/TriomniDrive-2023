@@ -15,6 +15,7 @@ import frc.robot.commands.SetForwardToTowardsFront;
 import frc.robot.commands.Spin;
 import frc.robot.subsystems.ControllerRumbler;
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.RaspberryPiComms;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
@@ -30,7 +31,8 @@ public class RobotContainer {
   private final XboxController m_controller = new XboxController(0);
   private final ControllerRumbler m_rumbler = new ControllerRumbler(m_controller);
   private final DriveTrain m_driveTrain = new DriveTrain();
-  
+
+  private final RaspberryPiComms m_raspberryPiComms = new RaspberryPiComms(4173, "rPi");
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
