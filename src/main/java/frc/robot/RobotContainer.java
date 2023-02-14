@@ -15,7 +15,7 @@ import frc.robot.commands.SetForwardToTowardsFront;
 import frc.robot.commands.Spin;
 import frc.robot.subsystems.ControllerRumbler;
 import frc.robot.subsystems.DriveTrain;
-import frc.robot.subsystems.RaspberryPiComms;
+import frc.robot.subsystems.ApriltagInfo;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
@@ -32,7 +32,7 @@ public class RobotContainer {
   private final ControllerRumbler m_rumbler = new ControllerRumbler(m_controller);
   private final DriveTrain m_driveTrain = new DriveTrain();
 
-  private final RaspberryPiComms m_raspberryPiComms = new RaspberryPiComms(4173, "rPi");
+  private final ApriltagInfo m_apriltagInfo = new ApriltagInfo(4173, "rPi");
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
