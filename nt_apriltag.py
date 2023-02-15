@@ -139,6 +139,7 @@ def main():
         publish(publishers, results)
 
         # Give the output stream a new image to display
+        # We could decorate it by marking the detected april tags
         if (outputImage):
             outputStream.putFrame(img)
         # If sleep is too long, you won't see the decorated image in img

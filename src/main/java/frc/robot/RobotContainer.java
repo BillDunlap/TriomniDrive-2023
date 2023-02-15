@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.DefaultTeleop;
 import frc.robot.commands.GoStraight;
+import frc.robot.commands.GoToApriltag;
 import frc.robot.commands.RumbleController;
 import frc.robot.commands.SetForwardToTowardsFront;
 import frc.robot.commands.Spin;
@@ -66,6 +67,13 @@ public class RobotContainer {
             );
     JoystickButton startButton = new JoystickButton(m_controller, XboxController.Button.kStart.value);
     startButton.onTrue(new SetForwardToTowardsFront(m_driveTrain));
+
+    // Pressing 'B' causes it to go to AprilTag 1.  Interrupt search when button is released
+    JoystickButton bButton = new JoystickButton(m_controller, XboxController.Button.kB.value);
+    bButton.whileTrue(new GoToApriltag(1, m_driveTrain, m_apriltagInfo).andThen(new RumbleController(m_rumbler, 0.5, 0.5)));
+    // 'X' button goes to AprilTag 3
+    JoystickButton xButton = new JoystickButton(m_controller, XboxController.Button.kX.value);
+    xButton.whileTrue(new GoToApriltag(3, m_driveTrain, m_apriltagInfo));
   }
 
   /**
