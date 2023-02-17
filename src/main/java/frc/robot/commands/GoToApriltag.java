@@ -7,6 +7,7 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.ApriltagInfo;
+import frc.robot.Vector2D;
 
 /** Find the April Tag with the desired ID and go to it.
  * Consider it done when the robot is c. a meter from the
@@ -27,6 +28,7 @@ public class GoToApriltag extends CommandBase {
   private final DriveTrain m_driveTrain;
   private final ApriltagInfo m_aprilTagInfo;
   private final int m_apriltagId;
+  private final Vector2D m_targetPosition;
   private enum State {
     kSEARCHING,
     kCENTERING,
@@ -40,6 +42,7 @@ public class GoToApriltag extends CommandBase {
     m_driveTrain = driveTrain;
     m_aprilTagInfo = aprilTagInfo;
     m_apriltagId = aprilTagId;
+    m_targetPosition = new Vector2D(0.0, 0.75, Vector2D.ConstructorType.kRadiansCcwDistance);
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(m_driveTrain);
   }
@@ -51,7 +54,25 @@ public class GoToApriltag extends CommandBase {
   }
 
   // Called every time the scheduler runs while the command is scheduled.
-  private double m_last_frameX=0.0;
+  private double m_last_frameX=0.0; // used only to limit debug printing
+
+  private double m_desiredDistanceFromTarget = 0.66; // meters for now, c. 2 feet
+  private double m_distanceTolerance = 0.1; // c. 4 inches
+  private double m_angularTolerance = 0.2; // c. +-11 degrees
+  private boolean isDone(ApriltagInfo.ApriltagRecord record) {
+    // TODO: use Vector2D 
+    return record.m_seen && 
+    Math.abs(record.getDistance() - m_desiredDistanceFromTarget) <= m_distanceTolerance &&
+    // positive pitch means we are to apriltag's right
+    Math.abs(record.getPitch() - 0.0) <= m_angularTolerance &&
+    Math.abs(record.getFrameX()) <= 0.05 ;
+  }
+
+  private void setState(State state){
+    System.out.println("/_\\ " + m_state + " -> " + state);
+    m_state = state;
+  }
+  
   @Override
   public void execute() {
     ApriltagInfo.ApriltagRecord record = m_aprilTagInfo.getApriltagRecord(m_apriltagId);
@@ -59,30 +80,44 @@ public class GoToApriltag extends CommandBase {
       case kSEARCHING:
         if (record.m_seen) {
           System.out.println("SEARCHING " + m_apriltagId + ": frameX=" + record.getFrameX());
-          m_state = State.kCENTERING;
+          setState(State.kCENTERING);
+        } else if (isDone(record)){
+          setState(State.kDONE);
         } else {
           m_driveTrain.spinDegreesPerSecond(40.0);
         }
         break;
       case kCENTERING:
         double frameX = record.getFrameX();
-        if (record.m_seen) {
-          if (Math.abs(m_last_frameX - frameX) > 0.01) {
+        if (!record.m_seen) {
+          setState(State.kSEARCHING);
+        } else if (isDone(record)) {
+          setState(State.kDONE);
+        } else if (Math.abs(frameX) <= 0.05) {
+          setState(State.kTRANSLATING);
+        } else {
+          if (Math.abs(m_last_frameX - frameX) > 0.01) { // for debug only
             System.out.println("CENTERING " + m_apriltagId + ": frameX=" + frameX);
             m_last_frameX = frameX;
           }
-          if (Math.abs(frameX) <= 0.10) {
-            System.out.println("DONE " + m_apriltagId + ": frameX=" + frameX);
-            m_state = State.kDONE;
-          } else {
-            // TODO: spin rate should depend on distance to target (slower when farther away)
-            m_driveTrain.spinDegreesPerSecond( Math.signum(frameX) * 25.0 );
-          }
-        } else {
-          m_state = State.kSEARCHING;
+          // TODO: spin rate should depend on distance to target (slower when farther away)
+          m_driveTrain.spinDegreesPerSecond( Math.signum(frameX) * 20.0 );
         }
         break;
       case kTRANSLATING:
+        if (!record.m_seen) {
+          setState(State.kSEARCHING);
+        } else if (isDone(record)) {
+          setState(State.kDONE);
+        } else if (Math.abs(record.getFrameX()) >= 0.2) {
+          setState(State.kCENTERING);
+        } else {
+          Vector2D currentPosition = new Vector2D(record.getPitch(), record.getDistance(), Vector2D.ConstructorType.kRadiansCcwDistance);
+          Vector2D toTarget = currentPosition.vectorTo(m_targetPosition);
+          double robotRelativeRadiansCcw = toTarget.getRadiansCcw() - (Math.PI + currentPosition.getRadiansCcw());
+          // System.out.println("TRANSLATING: " + robotRelativeRadiansCcw/Math.PI + " pi radians");
+          m_driveTrain.setVelocityFpsRadians(1.5, robotRelativeRadiansCcw);
+        }
         break;
       case kDONE:
         break;

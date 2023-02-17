@@ -45,6 +45,9 @@ public class ApriltagInfo extends SubsystemBase {
     public boolean wasSeen() {
       return m_seen;
     }
+    public double getDistance() {
+      return wasSeen() ? m_transform3d.getTranslation().getZ() : 0.0; // TODO: should use the 2 horizontal axes
+    }
     public double getYaw() {
       return wasSeen() ? m_transform3d.getRotation().getZ() : 0.0;
     }
