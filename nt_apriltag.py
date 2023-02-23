@@ -139,7 +139,7 @@ def main():
 
         global res # for debugging
         results = detect_and_process_apriltag(img, detector, estimator)
-        print("** delta(grab_time)=" + str( (grab_time-prev_grab_time)/1e6 ) + " s., " + str(len(results)) + " tags found")
+        # print("** delta(grab_time)=" + str( (grab_time-prev_grab_time)/1e6 ) + " s., " + str(len(results)) + " tags found")
         prev_grab_time = grab_time
         # normalize the within-frame coordinates to the range [-1,1]
         for result in results:
