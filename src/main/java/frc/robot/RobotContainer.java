@@ -33,7 +33,7 @@ public class RobotContainer {
   private final ControllerRumbler m_rumbler = new ControllerRumbler(m_controller);
   private final DriveTrain m_driveTrain = new DriveTrain();
 
-  private final ApriltagInfo m_apriltagInfo = new ApriltagInfo(4173, "rPi");
+  private final ApriltagInfo m_apriltagInfo = new ApriltagInfo(4173, "rPi", new int[]{1, 2, 3, 4, 5, 6, 7, 8});
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

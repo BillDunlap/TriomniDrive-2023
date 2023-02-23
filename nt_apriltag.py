@@ -50,23 +50,32 @@ def detect_and_process_apriltag(frame, detector, estimator):
     results = [ process_apriltag(estimator, tag) for tag in filter_tags ]
     return results
 
-def setup_network_table_publishers(teamNumber, clientName, maxNumberOfAprilTags):
-    global table
+def setup_network_table_publishers(teamNumber, clientName, apriltag_ids_to_publish):
+    global table # needs to exist for entire length of program
     logging.basicConfig(level=logging.DEBUG)
     instance = ntcore.NetworkTableInstance.getDefault()
     instance.setServerTeam(teamNumber)
     instance.startClient4(clientName)
     table = instance.getTable("/Apriltag")
-    publishers = [ table.getDoubleArrayTopic("id_pose_center_" + str(id+1)).publish() for id in range(maxNumberOfAprilTags) ]
-    [ publisher.setDefault([]) for publisher in publishers ]
+    publishers = {}
+    for id in apriltag_ids_to_publish:
+      publisher = table.getDoubleArrayTopic("id_pose_center_" + str(id)).publish()
+      publisher.setDefault([])
+      publishers[id] = publisher
     return publishers
     
 def publish(publishers, results): # assume 'results' are output of detect_and_process_apriltag
-    ids_not_seen = set(range(1, len(publishers)+1))
+    ids_not_seen = set(list(publishers.keys()))
+    # print(".publishing " + str([result['id'] for result in results]))
     for result in results:
         try:
             id = result['id'] # which apriltag
-            ids_not_seen.remove(id)
+            try:
+                ids_not_seen.remove(id) # will throw error if this is not one to publish
+            except:
+                print("id " + str(id) + " not in " + str(ids_not_seen) + ".  It is not published.")
+                continue
+            # print("..publishing " + str(id))
             a = [ float(id) ] 
             po = result['pose']
             tr = po.translation()
@@ -76,19 +85,19 @@ def publish(publishers, results): # assume 'results' are output of detect_and_pr
             a.extend( [ro.x, ro.y, ro.z] )
             ce = result['center']
             a.extend( [ce.x, ce.y] )
-            publishers[result['id']-1].set(a)
+            publishers[id].set(a)
         except:
             continue
     for id in ids_not_seen:
         try:
-            publishers[id-1].set([]) # empty message means this id was not seen in this frame
+            publishers[id].set([]) # empty message means this id was not seen in this frame
         except:
             continue
 
 #######
 def main():
     outputImage = False
-    maxNumberOfAprilTags = 30
+    apriltag_ids_to_publish = [1, 2, 3, 4, 5, 6, 7, 8]
     CS.enableLogging()
 
     # The Microsoft LifeCam HD-3000 has no unique id number
@@ -114,7 +123,7 @@ def main():
     detector, estimator = get_apriltag_detector_and_estimator(frame_size)
 
     global publishers
-    publishers = setup_network_table_publishers(4173, "rPi", maxNumberOfAprilTags)
+    publishers = setup_network_table_publishers(4173, "rPi", apriltag_ids_to_publish)
 
     prev_grab_time = 0
     while True:
@@ -128,10 +137,10 @@ def main():
             # skip the rest of the current iteration
             continue
 
-        print("delta(grab_time)=" + str( (grab_time-prev_grab_time)/1e6 ) + " s.")
-        prev_grab_time = grab_time
         global res # for debugging
         results = detect_and_process_apriltag(img, detector, estimator)
+        print("** delta(grab_time)=" + str( (grab_time-prev_grab_time)/1e6 ) + " s., " + str(len(results)) + " tags found")
+        prev_grab_time = grab_time
         # normalize the within-frame coordinates to the range [-1,1]
         for result in results:
             result['center'].x = (result['center'].x - frame_size[0]/2) / (frame_size[0]/2)
@@ -139,7 +148,6 @@ def main():
         publish(publishers, results)
 
         # Give the output stream a new image to display
-        # We could decorate it by marking the detected april tags
         if (outputImage):
             outputStream.putFrame(img)
         # If sleep is too long, you won't see the decorated image in img

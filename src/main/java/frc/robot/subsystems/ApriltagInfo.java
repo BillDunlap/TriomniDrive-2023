@@ -3,6 +3,8 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
+
+import java.util.HashMap;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -66,42 +68,45 @@ public class ApriltagInfo extends SubsystemBase {
   }
   // https://www.ssontech.com/docs/SynthEyesUM_files/Choosing_an_AprilTag.html
   // says family 16h5 contains 30 distinct tags.
-  private final int m_maxApriltagId = 30;
-  private ApriltagRecord[] m_apriltagRecords = new ApriltagRecord[m_maxApriltagId];
+  private final int[] m_apriltagIdsOfInterest;
+  private HashMap<Integer, ApriltagRecord> m_apriltagRecords = new HashMap<Integer, ApriltagRecord>();
   private final NetworkTableInstance m_instance;
-  private final DoubleArraySubscriber[] m_idPoseCenterSubscriber = new DoubleArraySubscriber[m_maxApriltagId];
+  private HashMap<Integer, DoubleArraySubscriber> m_idPoseCenterSubscribers = new HashMap<Integer, DoubleArraySubscriber>();
   
   /** Creates a new RaspberryPiComms. */
-  public ApriltagInfo(int teamNumber, String clientName) {
+  public ApriltagInfo(int teamNumber, String clientName, int[] apriltagIdsOfInterest) {
     m_instance = NetworkTableInstance.getDefault();
     m_instance.setServerTeam(teamNumber);
     m_instance.startClient4(clientName); // does server already exist?
+    m_apriltagIdsOfInterest = apriltagIdsOfInterest;
 
-    for(int id=1; id<=m_maxApriltagId; id++) {
-      m_idPoseCenterSubscriber[id-1] = m_instance.getDoubleArrayTopic("/Apriltag/id_pose_center_" + (id)).subscribe(new double[]{});
-      m_apriltagRecords[id-1] = new ApriltagRecord();
+    for(int id : m_apriltagIdsOfInterest) {
+      m_idPoseCenterSubscribers.put(id, m_instance.getDoubleArrayTopic("/Apriltag/id_pose_center_" + id).subscribe(new double[]{}));
+      m_apriltagRecords.put(id, new ApriltagRecord());
     }
   }
 
   public void updateRecordFromNetworkTables(int id){
-    TimestampedDoubleArray tsr = m_idPoseCenterSubscriber[id-1].getAtomic(); // time + raw vector of 9 doubles
+    TimestampedDoubleArray tsr = m_idPoseCenterSubscribers.get(id).getAtomic(); // time + raw vector of 9 doubles
     double[] idPosCenter = tsr.value;
-    if (tsr.timestamp == m_apriltagRecords[id-1].m_timestamp) {
+    ApriltagRecord apriltagRecord = getApriltagRecord(id);
+    if (tsr.timestamp == apriltagRecord.m_timestamp) {
       // nothing new - do nothing.  This is a wierd case.
     } else if (idPosCenter.length < 9){
       // means this id was not seen
-      m_apriltagRecords[id-1].m_seen = false;
+      apriltagRecord.m_seen = false;
     } else {
       if (idPosCenter[0] != id) {
         throw new RuntimeException("--- apriltag id mismatch: want " + id + ", but got" + idPosCenter[0]);
       }
-      m_apriltagRecords[id-1].m_id = (int)(idPosCenter[0]);
-      m_apriltagRecords[id-1].m_seen = true;
-      m_apriltagRecords[id-1].m_transform3d = makeTransform3d(idPosCenter);
-      m_apriltagRecords[id-1].m_center = makeCenter(idPosCenter);
-      m_apriltagRecords[id-1].m_timestamp = tsr.timestamp;
+      apriltagRecord.m_id = (int)(idPosCenter[0]);
+      apriltagRecord.m_seen = true;
+      apriltagRecord.m_transform3d = makeTransform3d(idPosCenter);
+      apriltagRecord.m_center = makeCenter(idPosCenter);
+      apriltagRecord.m_timestamp = tsr.timestamp;
       SmartDashboard.putNumber("id", idPosCenter[0]);
     }
+
   }
 
   private static Transform3d makeTransform3d(double[] idPosCenter){
@@ -114,13 +119,13 @@ public class ApriltagInfo extends SubsystemBase {
   }
 
   public ApriltagRecord getApriltagRecord(int id) {
-    return m_apriltagRecords[id-1];
+    return m_apriltagRecords.get(id);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    for(int id=1 ; id <= m_maxApriltagId ; id++) {
+    for(int id : m_apriltagIdsOfInterest) {
       updateRecordFromNetworkTables(id);
     }
     ApriltagRecord apriltagRecord1 = getApriltagRecord(1);
@@ -129,8 +134,8 @@ public class ApriltagInfo extends SubsystemBase {
     SmartDashboard.putNumber("Yaw 1", apriltagRecord1.getYaw() * rToD);
     SmartDashboard.putNumber("Pitch 1", apriltagRecord1.getPitch() * rToD);
     SmartDashboard.putNumber("Roll 1", apriltagRecord1.getRoll() * rToD);
-    SmartDashboard.putNumber("was seen", apriltagRecord1.wasSeen() ? 1.0 : 0.0);
-    SmartDashboard.putNumber("frame x", apriltagRecord1.getFrameX());
+    SmartDashboard.putNumber("1 was seen", apriltagRecord1.wasSeen() ? 1.0 : 0.0);
+    SmartDashboard.putNumber("1's frame x", apriltagRecord1.getFrameX());
     //SmartDashboard.put("array0", getArray()[0]);
     //SmartDashboard.putNumberArray("rPi Array", getArray());
   }
