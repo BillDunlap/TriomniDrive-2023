@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import frc.robot.TuningVariables;
+
 import java.util.HashMap;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -104,7 +106,9 @@ public class ApriltagInfo extends SubsystemBase {
       apriltagRecord.m_transform3d = makeTransform3d(idPosCenter);
       apriltagRecord.m_center = makeCenter(idPosCenter);
       apriltagRecord.m_timestamp = tsr.timestamp;
-      SmartDashboard.putNumber("id", idPosCenter[0]);
+      if (TuningVariables.debugLevel.get() >= 3) {
+        SmartDashboard.putNumber("id", idPosCenter[0]);
+      }
     }
 
   }
@@ -129,15 +133,18 @@ public class ApriltagInfo extends SubsystemBase {
       updateRecordFromNetworkTables(id);
     }
     ApriltagRecord apriltagRecord1 = getApriltagRecord(1);
-    SmartDashboard.putString("apriltag id 1", apriltagRecord1.toString());
+    if (TuningVariables.debugLevel.get() >= 2) {
+      SmartDashboard.putString("apriltag id 1", apriltagRecord1.toString());
+    }
     double rToD = 180.0 / Math.PI;
-    SmartDashboard.putNumber("Yaw 1", apriltagRecord1.getYaw() * rToD);
-    SmartDashboard.putNumber("Pitch 1", apriltagRecord1.getPitch() * rToD);
-    SmartDashboard.putNumber("Roll 1", apriltagRecord1.getRoll() * rToD);
-    SmartDashboard.putNumber("1 was seen", apriltagRecord1.wasSeen() ? 1.0 : 0.0);
-    SmartDashboard.putNumber("1's frame x", apriltagRecord1.getFrameX());
+    if (TuningVariables.debugLevel.get() >= 2) {
+      SmartDashboard.putNumber("Yaw 1", apriltagRecord1.getYaw() * rToD);
+      SmartDashboard.putNumber("Pitch 1", apriltagRecord1.getPitch() * rToD);
+      SmartDashboard.putNumber("Roll 1", apriltagRecord1.getRoll() * rToD);
+      SmartDashboard.putNumber("1 was seen", apriltagRecord1.wasSeen() ? 1.0 : 0.0);
+      SmartDashboard.putNumber("1's frame x", apriltagRecord1.getFrameX());
+    }
     //SmartDashboard.put("array0", getArray()[0]);
     //SmartDashboard.putNumberArray("rPi Array", getArray());
   }
-  
 }

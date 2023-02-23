@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import frc.robot.Constants;
+import frc.robot.TuningVariables;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -71,18 +72,26 @@ public class OmniWheel extends SubsystemBase {
 
   /** set target velocity in "native" units: ticks per 100 milliseconds */
   public void setVelocityNativeUnits(double clicksPer100Ms) {
-    SmartDashboard.putNumber("set native v: ", clicksPer100Ms);
+    if (TuningVariables.debugLevel.get() >= 3) {
+      SmartDashboard.putNumber("set native v: ", clicksPer100Ms);
+    }
     m_talonsrx.set(ControlMode.Velocity, clicksPer100Ms);
   }
 
   @Override
   public void periodic() {
     double v = m_talonsrx.getSelectedSensorVelocity();
-    SmartDashboard.putNumber("Velocity" + "(" + m_name + ")", v);
-    SmartDashboard.putNumber("Velocity" + "(" + m_name + ")" + " text", v);
+    if (TuningVariables.debugLevel.get() >= 3) {
+      SmartDashboard.putNumber("Velocity" + "(" + m_name + ")", v);
+      SmartDashboard.putNumber("Velocity" + "(" + m_name + ")" + " text", v);
+    }
     double p = m_talonsrx.getMotorOutputPercent();
-    SmartDashboard.putNumber("Omniwheel power" + "(" + m_name + ")", p);
+    if (TuningVariables.debugLevel.get() >= 3) {
+      SmartDashboard.putNumber("Omniwheel power" + "(" + m_name + ")", p);
+    }
     double i = m_talonsrx.getIntegralAccumulator();
-    SmartDashboard.putNumber("Int Acc" + "(" + m_name + ")", i);
+    if (TuningVariables.debugLevel.get() >= 3) {
+      SmartDashboard.putNumber("Int Acc" + "(" + m_name + ")", i);
+    }
   }
 }

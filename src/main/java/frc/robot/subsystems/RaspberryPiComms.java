@@ -3,6 +3,8 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot.subsystems;
 
+import frc.robot.TuningVariables;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import edu.wpi.first.networktables.DoubleSubscriber;
@@ -12,8 +14,8 @@ import edu.wpi.first.networktables.DoubleTopic;
 import edu.wpi.first.networktables.DoubleArrayTopic;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 /** A class to test the use of Network Table to read
- * from a Raspberry PI which is running the following python code
- * 
+ * from a Raspberry PI which is running the following python code.
+ * This should not be invoked except while developing NT code.
  * 
 import time
 import ntcore
@@ -83,8 +85,10 @@ public class RaspberryPiComms extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("RaspberryPiComms", getTest());
-    SmartDashboard.putNumber("array0", getArray()[0]);
-    SmartDashboard.putNumberArray("rPi Array", getArray());
+    if (TuningVariables.debugLevel.get() >= 3) {
+      SmartDashboard.putNumber("RaspberryPiComms", getTest());
+      SmartDashboard.putNumber("array0", getArray()[0]);
+      SmartDashboard.putNumberArray("rPi Array", getArray());
+    }
   }
 }

@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 // import frc.robot.subsystems.OmniWheel; // no need to import class in same directory
 import frc.robot.Constants;
+import frc.robot.TuningVariables;
 
 public class DriveTrain extends SubsystemBase {
   private final OmniWheel m_front;
@@ -129,7 +130,9 @@ public class DriveTrain extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    double angle = m_ahrs.getAngle();
-    SmartDashboard.putNumber("Angle", angle);
+    if (TuningVariables.debugLevel.get() >= 3) {
+      double angle = m_ahrs.getAngle();
+      SmartDashboard.putNumber("Angle", angle);
+    }
   }
 }
