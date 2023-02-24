@@ -56,9 +56,9 @@ public class GoToApriltag extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   private double m_last_frameX=0.0; // used only to limit debug printing
 
-  private double m_desiredDistanceFromTarget = 0.66; // meters for now, c. 2 feet
-  private double m_distanceTolerance = 0.1; // c. 4 inches
-  private double m_angularTolerance = 0.2; // c. +-11 degrees
+  private double m_desiredDistanceFromTarget = 0.66; // meters, c. 2 feet
+  private double m_distanceTolerance = 0.05; // c. 2 inches
+  private double m_angularTolerance = 0.1; // c. +-5.7 degrees
   private boolean isDone(ApriltagInfo.ApriltagRecord record) {
     // TODO: use Vector2D 
     return record.m_seen && 
@@ -79,12 +79,12 @@ public class GoToApriltag extends CommandBase {
     switch (m_state){
       case kSEARCHING:
         if (record.m_seen) {
-          System.out.println("SEARCHING " + m_apriltagId + ": frameX=" + record.getFrameX());
+          System.out.println("found " + m_apriltagId + ": frameX=" + record.getFrameX());
           setState(State.kCENTERING);
         } else if (isDone(record)){
           setState(State.kDONE);
         } else {
-          m_driveTrain.spinDegreesPerSecond(40.0);
+          m_driveTrain.spinDegreesPerSecond(20.0);
         }
         break;
       case kCENTERING:
@@ -116,7 +116,7 @@ public class GoToApriltag extends CommandBase {
           Vector2D toTarget = currentPosition.vectorTo(m_targetPosition);
           double robotRelativeRadiansCcw = toTarget.getRadiansCcw() - (Math.PI + currentPosition.getRadiansCcw());
           // System.out.println("TRANSLATING: " + robotRelativeRadiansCcw/Math.PI + " pi radians");
-          m_driveTrain.setVelocityFpsRadians(1.5, robotRelativeRadiansCcw);
+          m_driveTrain.setVelocityFpsRadians(2.5, robotRelativeRadiansCcw);
         }
         break;
       case kDONE:

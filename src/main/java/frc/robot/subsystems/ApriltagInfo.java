@@ -133,11 +133,11 @@ public class ApriltagInfo extends SubsystemBase {
       updateRecordFromNetworkTables(id);
     }
     ApriltagRecord apriltagRecord1 = getApriltagRecord(1);
-    if (TuningVariables.debugLevel.get() >= 2) {
+    if (TuningVariables.debugLevel.get() >= 4) {
       SmartDashboard.putString("apriltag id 1", apriltagRecord1.toString());
     }
     double rToD = 180.0 / Math.PI;
-    if (TuningVariables.debugLevel.get() >= 2) {
+    if (TuningVariables.debugLevel.get() >= 4) {
       SmartDashboard.putNumber("Yaw 1", apriltagRecord1.getYaw() * rToD);
       SmartDashboard.putNumber("Pitch 1", apriltagRecord1.getPitch() * rToD);
       SmartDashboard.putNumber("Roll 1", apriltagRecord1.getRoll() * rToD);

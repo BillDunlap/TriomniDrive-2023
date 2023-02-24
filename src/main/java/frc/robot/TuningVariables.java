@@ -26,7 +26,7 @@ public enum TuningVariables {
     // To add a new value, just enter its name and default value to the following list
     defaultSpinRate_DegreesPerSecond (40.0),
     defaultTravelRate_FeetPerSecond (2.0),
-    debugLevel(3.0); // scale of 0 to 10
+    debugLevel(1.0); // scale of 0 to 10
 
     private double m_defaultValue;
     /** Users cannot call an enum constructor directly;

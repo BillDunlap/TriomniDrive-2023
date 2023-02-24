@@ -16,12 +16,13 @@ def get_apriltag_detector_and_estimator(frame_size):
     # FRC 2023 uses tag16h5 (game manual 5.9.2)
     assert detector.addFamily("tag16h5")
     estimator = robotpy_apriltag.AprilTagPoseEstimator(
+    # config numbers from https://calibdb.net for Microsoft LifeCam HD-3000 at 640x480 pixels
     robotpy_apriltag.AprilTagPoseEstimator.Config(
-            0.2,
-            500,
-            500,
-            frame_size[1] / 2.0,
-            frame_size[0] / 2.0
+            0.1524, # width of tag in meters (6 inches / 39.37 ) (was 0.2)
+            737.12,    # fx (was 500)
+            741.93,    # fy (was 500)
+            324.95,    # cx (was frame_size[1] / 2.0),
+            245.72     # cy (was frame_size[0] / 2.0)
         )
     )
     return detector, estimator
