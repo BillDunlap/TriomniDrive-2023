@@ -62,7 +62,8 @@ def setup_network_table_publishers(teamNumber, clientName, apriltag_ids_to_publi
     for id in apriltag_ids_to_publish:
       publisher = table.getDoubleArrayTopic("id_pose_center_" + str(id)).publish()
       publisher.setDefault([])
-      publishers[id] = publisher
+      # wasSeenLastTime=True is to force a network tables put() at startup
+      publishers[id] = { "publisher":publisher, "wasSeenLastTime":True }
     return publishers
     
 def publish(publishers, results): # assume 'results' are output of detect_and_process_apriltag
@@ -86,14 +87,22 @@ def publish(publishers, results): # assume 'results' are output of detect_and_pr
             a.extend( [ro.x, ro.y, ro.z] )
             ce = result['center']
             a.extend( [ce.x, ce.y] )
-            publishers[id].set(a)
+            publisher = publishers[id]
+            publisher["publisher"].set(a)
+            if not publisher["wasSeenLastTime"]:
+                print("* Started seeing " + str(id))
+                publisher["wasSeenLastTime"] = True
         except:
             continue
     for id in ids_not_seen:
-        try:
-            publishers[id].set([]) # empty message means this id was not seen in this frame
-        except:
-            continue
+        publisher = publishers[id]
+        if publisher["wasSeenLastTime"]:
+            print("* Lost sight of " + str(id))
+            try:
+                publisher["publisher"].set([]) # empty message means this id was not seen in this frame
+                publisher["wasSeenLastTime"] = False
+            except:
+                continue
 
 #######
 def main():
