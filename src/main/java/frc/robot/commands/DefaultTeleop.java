@@ -29,11 +29,17 @@ public class DefaultTeleop extends CommandBase {
   }
   
   // Called when the command is initially scheduled.
+  // A default command for subsystem is scheduled after and interrupting command is done.
+  // E.g., if default command handles quantitative inputs, like joystick or gyroscope
+  // readings, for a subsystem but you have other commands attached to button presses,
+  // then just before each time a button-press-initiated command runs the default command's
+  // end(interrupted=TRUE) method will be called and after the button-press-initiated command
+  // is done the default command's initialize method will be called again.  Hence, don't
+  // do things like zero the gyro in initialize.
   @Override
   public void initialize() {
     m_driveTrain.beStill();
     m_controllerRumbler.beQuiet();
-    // m_driveTrain.setZeroAngleDegrees(0.0); // does initialize() get called just once for a default command?
     defaultSpinRate_DegreesPerSecond = TuningVariables.defaultSpinRate_DegreesPerSecond.get();
     defaultTravelRate_FeetPerSecond = TuningVariables.defaultTravelRate_FeetPerSecond.get();
   }
