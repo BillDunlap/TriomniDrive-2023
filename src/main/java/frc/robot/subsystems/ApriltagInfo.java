@@ -75,7 +75,11 @@ public class ApriltagInfo extends SubsystemBase {
   private final NetworkTableInstance m_instance;
   private HashMap<Integer, DoubleArraySubscriber> m_idPoseCenterSubscribers = new HashMap<Integer, DoubleArraySubscriber>();
   
-  /** Creates a new RaspberryPiComms. */
+  /** Create a Network Tables client to collect AprilTag information broadcast by the Raspberry Pi
+   * @param teamNumber - used to locate the NT server
+   * @param clientName - used to identify this client
+   * @param apriltagIdsOfInterest - list of AprilTags that we wish to track
+   */
   public ApriltagInfo(int teamNumber, String clientName, int[] apriltagIdsOfInterest) {
     m_instance = NetworkTableInstance.getDefault();
     m_instance.setServerTeam(teamNumber);
