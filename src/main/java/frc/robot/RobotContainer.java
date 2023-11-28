@@ -14,8 +14,10 @@ import frc.robot.commands.GoToApriltag;
 import frc.robot.commands.RumbleController;
 import frc.robot.commands.SetForwardToTowardsFront;
 import frc.robot.commands.Spin;
+import frc.robot.commands.XmasPattern;
 import frc.robot.subsystems.ControllerRumbler;
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.LEDStrip;
 import frc.robot.subsystems.ApriltagInfo;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -32,7 +34,7 @@ public class RobotContainer {
   private final XboxController m_controller = new XboxController(0);
   private final ControllerRumbler m_rumbler = new ControllerRumbler(m_controller);
   private final DriveTrain m_driveTrain = new DriveTrain();
-
+  private final LEDStrip m_ledStrip = new LEDStrip(0, 60);
   private final ApriltagInfo m_apriltagInfo = new ApriltagInfo(4173, "rPi", new int[]{1, 2, 3, 4, 5, 6, 7, 8});
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -74,6 +76,14 @@ public class RobotContainer {
     // 'X' button goes to AprilTag 3
     JoystickButton xButton = new JoystickButton(m_controller, XboxController.Button.kX.value);
     xButton.whileTrue(new GoToApriltag(3, m_driveTrain, m_apriltagInfo).andThen(new RumbleController(m_rumbler, 0.5, 0.5)));
+    // right 'bumper' toggles Xmas lights
+    // (We've run out of buttons on the Xbox controller - the 
+    // drive train's default command uses the buttons to do
+    // slow rotations.)
+    JoystickButton xmasTriggerOut = new JoystickButton(m_controller, XboxController.Button.kRightBumper.value);
+    xmasTriggerOut.whileTrue(new XmasPattern(m_ledStrip, 0.125, LEDStrip.MotionType.kRotateOut)); 
+    JoystickButton xmasTriggerIn = new JoystickButton(m_controller, XboxController.Button.kLeftBumper.value);
+    xmasTriggerIn.whileTrue(new XmasPattern(m_ledStrip, 0.125, LEDStrip.MotionType.kRotateIn )); 
   }
 
   /**
