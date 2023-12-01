@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj.GenericHID;// HID stands for Human interface device
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
+import frc.robot.commands.BlinkLED;
 import frc.robot.commands.DefaultTeleop;
 import frc.robot.commands.GoStraight;
 import frc.robot.commands.GoToApriltag;
@@ -40,6 +42,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     SmartDashboard.putData(m_driveTrain); // show commands controlling the drive train
+    SmartDashboard.putData(m_ledStrip);
     configureButtonBindings();
     m_driveTrain.setDefaultCommand(new DefaultTeleop(m_driveTrain, m_controller, m_rumbler));
   }
@@ -73,9 +76,13 @@ public class RobotContainer {
     // Pressing 'B' causes it to go to AprilTag 1.  Interrupt search when button is released
     JoystickButton bButton = new JoystickButton(m_controller, XboxController.Button.kB.value);
     bButton.whileTrue(new GoToApriltag(1, m_driveTrain, m_apriltagInfo).andThen(new RumbleController(m_rumbler, 0.5, 0.5)));
-    // 'X' button goes to AprilTag 3
+    // 'X' toggles blinking of LEDs
     JoystickButton xButton = new JoystickButton(m_controller, XboxController.Button.kX.value);
-    xButton.whileTrue(new GoToApriltag(3, m_driveTrain, m_apriltagInfo).andThen(new RumbleController(m_rumbler, 0.5, 0.5)));
+    xButton.toggleOnTrue(new BlinkLED(m_ledStrip,
+      new double[]{0.5, 0.25},
+      new Color[][]{
+        new Color[]{ Color.kBlue, Color.kBlue, Color.kBlue, Color.kYellow},
+        new Color[]{ Color.kRed, Color.kGreen, Color.kGreen}}));
     // right 'bumper' toggles Xmas lights
     // (We've run out of buttons on the Xbox controller - the 
     // drive train's default command uses the buttons to do
