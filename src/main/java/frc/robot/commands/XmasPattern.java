@@ -48,7 +48,7 @@ public class XmasPattern extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_ledStrip.turnAllOff();
+    // m_ledStrip.turnAllOff();
     m_ledStrip.setMotionType(LEDStrip.MotionType.kNoMotion);
   }
 

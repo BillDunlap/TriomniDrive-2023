@@ -7,9 +7,11 @@ package frc.robot;
 import edu.wpi.first.wpilibj.GenericHID;// HID stands for Human interface device.
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.commands.BlinkLED;
+import frc.robot.commands.ChaseLED;
 import frc.robot.commands.DefaultTeleop;
 import frc.robot.commands.GoStraight;
 import frc.robot.commands.GoToApriltag;
@@ -83,6 +85,11 @@ public class RobotContainer {
       new Color[][]{
         new Color[]{ Color.kBlue, Color.kBlue, Color.kBlue, Color.kYellow},
         new Color[]{ Color.kRed, Color.kGreen, Color.kGreen}}));
+    new Trigger(() -> m_controller.getPOV() == 180).toggleOnTrue(new ChaseLED(m_ledStrip,
+      0.1,
+      ChaseLED.Direction.kOut, 
+      new Color[]{ Color.kViolet, Color.kBlueViolet, Color.kBlue, Color.kAqua,
+        Color.kGreen, Color.kYellowGreen, Color.kYellow, Color.kWhite}));
     // right 'bumper' toggles Xmas lights
     // (We've run out of buttons on the Xbox controller - the 
     // drive train's default command uses the buttons to do
